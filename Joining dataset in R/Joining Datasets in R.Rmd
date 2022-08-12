@@ -1,0 +1,218 @@
+---
+title: "Joining Datasets"
+author: "Mostafa Mohiuddin Jalal (14334066)"
+date: "`r format(Sys.time(),'%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+
+
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+
+---
+
+
+<style>
+#TOC {
+  
+}
+</style>
+
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  comment = "#>"
+)
+```
+
+
+<!-- Reading Datasets -->
+```{r datasets, include = FALSE, message = FALSE}
+# Import Library
+library(magrittr)
+library(dplyr)
+library(readr)
+
+first_table = read_csv("ft3.csv")
+second_table = read.csv("st2.csv")
+```
+
+
+# Overview
+Joining data is one of the essential skills in data analysis. The concept of joining data is straightforward yet can be confusing at first or while transitioning from excel to python/SQL/R. This vignette aims to provide a walkthrough with an intuitive explanation of joining data in R and how to do it. One of the most used R package __dplyr__ is used to perform these operations.
+<br>
+<br>
+This vignette will first go through the definition of data join,and different types of join.
+
+**_Note_**
+
+If __dplyr__ package is not available in the environment, simple steps including installing and importing the package(only importing if installed already) can solve the problem.
+```{r install dplyr, include=TRUE, warning=FALSE}
+install.packages("dplyr")
+library(dplyr)
+```
+
+<br>
+
+# The Definition
+At times, data can be scattered in different dataset. It is essential to combine the datasets to perform the expected analysis.
+
+> The data join operation is when two or more datasets are combined where at least one column is similar in each dataset.
+
+Here, the join operations will be illustrated using two very simple and short dataset.
+```{r first dataset, include=TRUE}
+show(first_table)
+```
+
+
+```{r second dataset, include=TRUE}
+show(second_table)
+```
+
+
+<br>
+
+# Types of Join
+The primary purpose of joining two dataset is to merge records from more than one source. There are two types of joins.
+
+1. Mutating Join
+2. Filtering Join
+
+<br>
+
+## Mutating Join
+A Mutating Join combines data from two or more datasets based on the matched observation in both datasets. It adds new variables to a dataset from matching cases from another dataset. There are four types of mutating verbs in __dplyr__ package.
+
+<br>
+
+### I. Inner Join
+The inner join keyword is used to select all the common rows between columns. If there are records in _first table_ that do not match with _second table_, the records will be discarded from result dataset.
+
+![Inner Join](1.png)
+
+
+```{r inner_join, include = TRUE}
+# Performing Inner Join
+# Here, both the dataset have common variable, that is: C_first in first_table and C_second in second_table
+# in the "by" part, the column names must follow order. For exapmple, here, first_table is the first dataset,
+# and second_table is second dataset Like that, "C_first" is from first dataset and "C_second" is from second dataset
+# This order must be maintained. It will not work otherwise.
+
+
+first_table %>%
+  inner_join(second_table, by = c("C_first"="C_second"))
+```
+In the result, there is __B.x__ and __B.y__. They are both __B__ column. As no suffix has been assigned to them, they have taken system based suffixes. However, it is possible to define suffix by the user.
+
+```{r inner_join_suffix, include=TRUE}
+
+# Here, the operation has taken all the matching records from first_table data and second_table data.
+first_table %>%
+  inner_join(second_table, by = c("C_first"="C_second"), suffix = c("_first_table", "_second_table"))
+```
+
+
+<br>
+
+### II. Left Join
+The left join returns all the records from _first table_ and the matching records from _second table_. If there is no match between these datasets, only the records from left dataset will appear. 
+
+![Left Join](2.png)
+
+```{r left_join, include = TRUE}
+# This operation will take all the records from first_table and only the matching records from second_table.
+
+first_table %>%
+  left_join(second_table, by = c("C_first"="C_second"), suffix = c("_first_table", "_second_table"))
+```
+
+
+<br>
+
+### III. Right Join
+The right join is just the opposite of left join. It returns all the records from _second table_ and only the matching records from _first table_. Here, if there is no match in record in the _first table_, only the records from _second table_ will appear in the result.
+
+![Right Join](3.png)
+
+```{r right_join, include = TRUE}
+# This operation will take all the records from second_table and only the matching records from first_table.
+
+first_table %>%
+  right_join(second_table, by = c("C_first"="C_second"), suffix = c("_first_table", "_second_table"))
+```
+
+
+<br>
+
+### IV. Full Join
+A full join merges both the datasets and returns all the rows from both datasets, it is insignificant whether or not they have matching rows.
+
+![Full Join](4.png)
+
+```{r full_join, include = TRUE}
+# This operation will take all the records from both first_table and second_table.
+
+first_table %>%
+  full_join(second_table, by = c("C_first"="C_second"), suffix = c("_first_table", "_second_table"))
+```
+
+
+<br>
+
+## Filtering Join
+A filtering join is as the name suggests, filters rows while joining. It does not add or remove new variable in the result. It keeps or removes observations from _first table_. Simply put, it is used to find the matching or non-matching observations between datasets. There are two types of filtering join verb in __dplyr__ package.
+
+<br>
+
+### I. Semi Join
+A semi join returns the common rows between two datasets. If the _first table_ has matching rows with _second table_, a semi join will return all the matching rows from _first table_ and it will not add any other variable to the dataset.
+
+![Semi Join](5.png)
+
+```{r semi_join, include = TRUE}
+# This operation will take all the records from first_table that match second_table However, it will not include additional columns in the result. Hence, it does not require the suffix keyword.
+
+first_table %>%
+  semi_join(second_table, by = c("C_first"="C_second"))
+```
+
+
+<br>
+
+### II. Anti Join
+An anti join is just the opposite process of a semi join. It returns the rows that are not matching. If there are observations in the _first table_ that do not match with the _second table_, using anti join will bring them forward and in addition, it will not add or remove any variable from the _first table_.
+
+![Anti Join](6.png)
+
+```{r anti_join, include = TRUE}
+# This operation will take all the records from first_table that do not match with second_table.
+
+first_table %>%
+  anti_join(second_table, by = c("C_first"="C_second"))
+```
+
+
+<br>
+This discussion above provides the elementary discussion on **joining datasets in r**. Joining can occur among several tables and, at times, on more than two variables on each table. This vignette aims to provide the intuitions behind the join types and their basic operation procedure. However, there are many options to explore joining data.
+
+<!-- > "He who gives up [code] safety for [code] speed deserves neither." -->
+<!-- ([via](https://twitter.com/hadleywickham/status/504368538874703872)) -->
+
+# References
+
+Harry Cooney.(2019, January 28). _What Are Data Joins?_.
+<br>
+https://www.thedataschool.co.uk/harry-cooney/what-are-data-joins
+
+Tableau. _Join Your Data_. Tableau Desktop and Web Authoring Help
+<br>
+https://help.tableau.com/current/pro/desktop/en-us/joining_tables.htm
