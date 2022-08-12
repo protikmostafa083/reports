@@ -1,6 +1,6 @@
 ---
 title: "Joining Datasets"
-author: "Mostafa Mohiuddin Jalal (14334066)"
+author: "Mostafa Mohiuddin Jalal"
 date: "`r format(Sys.time(),'%d %B %Y')`"
 output:
   html_document:
